@@ -30,10 +30,10 @@ textarea {
         Message:
         <textarea class="form-control" id="sign_message" placeholder="Hello, world"></textarea>
 
-        Your private key:
+        Your RSA private key:
         <textarea class="form-control" id="sign_privkey" placeholder="-----BEGIN PRIVATE KEY-----&#10;[...]"></textarea>
 
-        Other members' public keys:
+        Other members' RSA public keys:
         <div id="sign_pubkeys">
         </div>
 
@@ -74,7 +74,6 @@ var example_keys = {
 var sign_num_keys = 0;
 var verify_num_keys = 0;
 add_pubkey();
-add_pubkey();
 
 // not cryptographically secure...
 function shuffle(a) {
@@ -88,7 +87,6 @@ function shuffle(a) {
 }
 
 function add_key_dropdown(id) {
-    console.log("add key dropdown " + id);
     var options_html = '<option name="Custom">Custom</option>';
     for (var k in example_keys) {
         options_html += "<option name=\"" + k + "\">" + k + "</option>";
@@ -151,7 +149,7 @@ $('#verify_verify').click(function() {
             $('#verify_output').append("<textarea class=\"form-control\" id=\"verify_pubkey_" + i + "\" placeholder=\"-----BEGIN PUBLIC KEY-----&#10;[...]\"></textarea>");
             add_key_dropdown('verify_pubkey_' + i);
         }
-        $('#verify_output').append("<br><button class=\"btn btn-primary\" id=\"verify_verifykeys\">Verify keys &raquo;</button>");
+        $('#verify_output').append("<button class=\"btn btn-primary\" id=\"verify_verifykeys\">Verify keys &raquo;</button>");
         $('#verify_output').append("<div id=\"verify_keys_output\"></div>");
         $('#verify_verifykeys').click(function() {
             var keys = [];
