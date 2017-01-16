@@ -158,9 +158,9 @@ $('#verify_verify').click(function() {
             }
 
             if (keys_match(sig, keys)) {
-                $('#verify_keys_output').html("OK");
+                $('#verify_keys_output').html("The keys <b>match</b>. This means you know the message was signed by one of the key holders.");
             } else {
-                $('#verify_keys_output').html("Not OK");
+                $('#verify_keys_output').html("They keys <b>do not match</b>. The message was signed with a different set of keys.");
             }
         });
     }
