@@ -3,6 +3,11 @@
 <head>
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <title>Ring Signatures</title>
+<style type="text/css">
+textarea {
+    margin-bottom: 16px;
+}
+</style>
 <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="jsencrypt.js"></script>
 <script src="jsbn.js"></script>
@@ -60,11 +65,18 @@
 
 <script type="text/javascript">
 
+var example_keys = {
+    "example1": {
+        pubkey: "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC+/OAPKJ5Ic15Ttr1Dpk90Iae+\n5sHCdJUMHa90cHnBwsBfNsDBZX+qlJlb2Y6yUGc26aoou58VSCFvSXNZus9CcNHE\nIPO/kJTiQRWA6Hng9Dhb8MesHKRt8IKELrS/FO7NAiCXJ5DunJ3Im/YiBUYnGt4T\np+exHWB97N9TX0BYLwIDAQAB\n-----END PUBLIC KEY-----",
+    },
+};
+
 var sign_num_keys = 0;
 var verify_num_keys = 0;
 add_pubkey();
 add_pubkey();
 
+// not cryptographically secure...
 function shuffle(a) {
     var j, x, i;
     for (i = a.length; i; i--) {
@@ -75,16 +87,34 @@ function shuffle(a) {
     }
 }
 
+function add_key_dropdown(id) {
+    console.log("add key dropdown " + id);
+    var options_html = '<option name="Custom">Custom</option>';
+    for (var k in example_keys) {
+        options_html += "<option name=\"" + k + "\">" + k + "</option>";
+    }
+    $("<select class=\"form-control\" id=\"" + id + "_select\">" + options_html + "</select>").insertBefore('#' + id);
+    $('#' + id + '_select').change(function() {
+        var k = $('#' + id + '_select').val();
+        if (k == 'Custom') {
+            $('#' + id).val('');
+        } else {
+            $('#' + id).val(example_keys[k]["pubkey"]);
+        }
+    });
+}
+
 function add_pubkey() {
     sign_num_keys++;
-    // TODO: add dropdown box for example keys
     $('#sign_pubkeys').append("<textarea class=\"form-control\" id=\"sign_pubkey_" + sign_num_keys + "\" placeholder=\"-----BEGIN PUBLIC KEY-----&#10;[...]\"></textarea>");
+    add_key_dropdown('sign_pubkey_' + sign_num_keys);
 }
 
 function del_pubkey() {
     if (sign_num_keys == 1)
         return;
     $('#sign_pubkey_' + sign_num_keys).remove();
+    $('#sign_pubkey_' + sign_num_keys + '_select').remove();
     sign_num_keys--;
 }
 
@@ -116,15 +146,24 @@ $('#verify_verify').click(function() {
     $('#verify_output').html('SHA1 of message: <code>' + Sha1.hash($('#verify_message').val()) + '</code><br>Ring signature <b>' + (ver ? 'verified' : 'NOT VERIFIED (is the message correct?)') + '</b>');
 
     if (ver) {
-        $('#verify_output').append("<br>This means the signature is consistent with the message.<br><br>You also need to check that the keys are as expected:<br>");
-        for (var i = 0; i < sig["keys"].length; i++) {
-            // TODO: add dropdown box for example keys
+        $('#verify_output').append("<br>This means the signature is consistent with the message.<br><br>You also need to check that the keys are as expected (order is not important):<br>");
+        for (var i = 1; i <= sig["keys"].length; i++) {
             $('#verify_output').append("<textarea class=\"form-control\" id=\"verify_pubkey_" + i + "\" placeholder=\"-----BEGIN PUBLIC KEY-----&#10;[...]\"></textarea>");
+            add_key_dropdown('verify_pubkey_' + i);
         }
         $('#verify_output').append("<br><button class=\"btn btn-primary\" id=\"verify_verifykeys\">Verify keys &raquo;</button>");
         $('#verify_output').append("<div id=\"verify_keys_output\"></div>");
         $('#verify_verifykeys').click(function() {
-            $('#verify_keys_output').html("OK");
+            var keys = [];
+            for (var i = 1; i <= sig["keys"].length; i++) {
+                keys.push(new JSEncryptRSAKey($('#verify_pubkey_' + i).val()));
+            }
+
+            if (keys_match(sig, keys)) {
+                $('#verify_keys_output').html("OK");
+            } else {
+                $('#verify_keys_output').html("Not OK");
+            }
         });
     }
 });

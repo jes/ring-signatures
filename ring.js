@@ -96,6 +96,20 @@ function verify(message, sig) {
     return r.toString() == X[0].toString();
 }
 
+function stringify_keys(k) {
+    var strkeys = [];
+    for (var i = 0; i < k.length; i++) {
+        strkeys.push("e:" + k[i].e.toString() + "n:" + k[i].n.toString());
+    }
+
+    strkeys.sort();
+    return strkeys.join(',');
+}
+
+function keys_match(sig, k) {
+    return stringify_keys(sig["keys"]) == stringify_keys(k);
+}
+
 // arg is string
 // THIS FUNCTION IS CORRECT
 function permut(message) {
